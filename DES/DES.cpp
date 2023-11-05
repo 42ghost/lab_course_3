@@ -2,6 +2,7 @@
 
 class DES_Encryption
 {
+    const int Rounds = 20;
     // intital permutation table
     const int IP_table[64] = { 
 			58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4,
@@ -74,24 +75,24 @@ class DES_Encryption
 				{7 , 11, 4 , 1 , 9 , 12, 14, 2 , 0 , 6 , 10, 13, 15, 3 , 5 , 8 },
 				{2 , 1 , 14, 7 , 4 , 10, 8 , 13, 15, 12, 9 , 0 , 3 , 5 , 6 , 11},
 			},
-	                };
+	        };
 	
 	// permutation function           
     const int P[32] = { 	
-				16, 7 , 20, 21, 29, 12, 28, 17, 1 , 15, 23, 26, 5 , 18, 31, 10,
-				2 , 8 , 24, 14, 32, 27, 3 , 9 , 19, 13, 30, 6 , 22, 11, 4 , 25,
+				        16, 7 , 20, 21, 29, 12, 28, 17, 1 , 15, 23, 26, 5 , 18, 31, 10,
+				        2 , 8 , 24, 14, 32, 27, 3 , 9 , 19, 13, 30, 6 , 22, 11, 4 , 25,
 				      };
     
     // permuted choice 1
     const int pc_11[28] = {
-				57, 49, 41, 33, 25, 17, 9 , 1 , 58, 50, 42, 34, 26, 18,
-    			10, 2 , 59, 51, 43, 35, 27, 19, 11, 3 , 60, 52, 44, 36,
-				};
+				        57, 49, 41, 33, 25, 17, 9 , 1 , 58, 50, 42, 34, 26, 18,
+            			10, 2 , 59, 51, 43, 35, 27, 19, 11, 3 , 60, 52, 44, 36,
+				      };
 
 	const int pc_12[28] = {
-				63, 55, 47, 39, 31, 23, 15, 7 , 62, 54, 46, 38, 30, 22,
-    			14, 6 , 61, 53, 45, 37, 29, 21, 13, 5 , 28, 20, 12, 4 ,
-				};
+				        63, 55, 47, 39, 31, 23, 15, 7 , 62, 54, 46, 38, 30, 22,
+            			14, 6 , 61, 53, 45, 37, 29, 21, 13, 5 , 28, 20, 12, 4 ,
+				      };
 
     // number of bits to shift for each iteration
 	int num_leftShift[16] = { 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1 };
@@ -138,7 +139,7 @@ class DES_Encryption
 		}
 
 		//key from 2*28 to 48
-		for (int i = 0; i < 16; ++i){
+		for (int i = 0; i < Rounds; ++i){
 			KL = lshift28b(KL, num_leftShift[i]);
 			KR = lshift28b(KR, num_leftShift[i]);
 			K = ((KL << 28) | KR) << 4;
@@ -223,13 +224,13 @@ class DES_Encryption
 	}
 
 	void feistel(uint32_t *L, uint32_t *R, uint64_t *keys){
-		for (int i = 0; i < 16; ++i){
+		for (int i = 0; i < Rounds; ++i){
 			round_feistel(L, R, keys[i]);
 		}
 	}
 
 	void defeistel(uint32_t *L, uint32_t *R, uint64_t *keys){
-		for (int i = 15; i >= 0; --i){
+		for (int i = Rounds - 1; i >= 0; --i){
 			round_feistel(R, L, keys[i]);
 		}
 	}
@@ -257,8 +258,8 @@ class DES_Encryption
 	
 	public:
 		int encrypt(uint8_t *key, uint8_t *input, uint8_t *output, int len){
-			// генерация ключей 16 по 48 бит
-			uint64_t keys[16] = {};
+			// генерация ключей по 48 бит
+			uint64_t keys[Rounds] = {};
 			gen_keys(uint8_to_uint64(key), keys);
 			
 			uint32_t L, R;
@@ -272,8 +273,8 @@ class DES_Encryption
 		}
 
 		int decrypt(uint8_t *key, uint8_t *input, uint8_t *output, int len){
-			// генерация ключей 16 по 48 бит
-			uint64_t keys[16] = {};
+			// генерация ключей по 48 бит
+			uint64_t keys[Rounds] = {};
 			gen_keys(uint8_to_uint64(key), keys);
 			
 			uint32_t L, R;
